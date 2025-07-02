@@ -1,0 +1,5 @@
+# Ignorar node_modules en cualquier subcarpeta (como frontend)
+**/node_modules/
+
+# Ignorar entornos virtuales de Python (como backend/venv)
+**/venv/
