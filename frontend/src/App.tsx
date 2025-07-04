@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 function AnimatedBackground() {
   return (
     <div className="absolute inset-0 -z-10 overflow-hidden">
@@ -14,7 +12,7 @@ function AnimatedBackground() {
   );
 }
 
-function Landing() {
+function Intro() {
   return (
     <section className="relative min-h-screen flex flex-col">
       <AnimatedBackground />
@@ -31,64 +29,74 @@ function Landing() {
   );
 }
 
+function Instructions() {
+  return (
+    <section className="w-full min-h-screen bg-white flex flex-col items-center justify-center transition-colors duration-700">
+      <h2 className="text-5xl font-bold mb-4 text-black text-center">
+        Your data, in your language
+      </h2>
+      <div className="max-w-5xl w-full flex flex-row gap-8 justify-center">
+        {/* Cuando este hecha la interfaz completamente, poner capturas antes de cada paso */}
+        {/* Paso 1 */}
+        <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" role="img" aria-label="plug">🔌</span>
+            <span className="font-semibold text-lg">Connect your database</span>
+          </div>
+          <div className="text-gray-700 mt-1 text-justify">
+            If you only have the schema, Hermes can help you explore it.<br /><br />
+            If you connect to the full database, you'll be able to ask about your data too.
+          </div>
+        </div>
+        {/* Paso 2 */}
+        <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" role="img" aria-label="chat">💬</span>
+            <span className="font-semibold text-lg">Ask your question</span>
+          </div>
+          <div className="text-gray-700 mt-1">
+            Write what you want to know — as naturally as you'd say it.<br /><br />
+            Hermes takes care of the rest.
+          </div>
+        </div>
+        {/* Paso 3 */}
+        <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl" role="img" aria-label="check">✅</span>
+            <span className="font-semibold text-lg">Get your answer</span>
+          </div>
+          <div className="text-gray-700 mt-1">
+            In seconds, you'll get a clear, human-friendly response.<br />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Start() {
+  return (
+    <section className="w-full min-h-[40vh] flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 py-20">
+      <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">
+        Ready to talk to your data?
+      </h2>
+      <div className="flex flex-col items-center gap-4">
+        <button
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-lg font-semibold shadow transition"
+        >
+          Try it now
+        </button>
+      </div>
+    </section>
+  );
+}
+
 export default function App() {
   return (
     <div>
-      <Landing />
-      <section className="w-full min-h-screen bg-white flex flex-col items-center justify-center transition-colors duration-700">
-        <h2 className="text-5xl font-bold mb-4 text-black text-center">
-          Your data, in your language
-        </h2>
-        <div className="max-w-5xl w-full flex flex-row gap-8 justify-center">
-          {/* Cuando este hecha la interfaz completamente, poner capturas antes de cada paso */}
-          {/* Paso 1 */}
-          <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl" role="img" aria-label="plug">🔌</span>
-              <span className="font-semibold text-lg">Connect your database</span>
-            </div>
-            <div className="text-gray-700 mt-1 text-justify">
-              If you only have the schema, Hermes can help you explore it.<br /><br />
-              If you connect to the full database, you'll be able to ask about your data too.
-            </div>
-          </div>
-          {/* Paso 2 */}
-          <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl" role="img" aria-label="chat">💬</span>
-              <span className="font-semibold text-lg">Ask your question</span>
-            </div>
-            <div className="text-gray-700 mt-1">
-              Write what you want to know — as naturally as you'd say it.<br /><br />
-              Hermes takes care of the rest.
-            </div>
-          </div>
-          {/* Paso 3 */}
-          <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl" role="img" aria-label="check">✅</span>
-              <span className="font-semibold text-lg">Get your answer</span>
-            </div>
-            <div className="text-gray-700 mt-1">
-              In seconds, you'll get a clear, human-friendly response.<br />
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Nueva sección de llamada a la acción */}
-      <section className="w-full min-h-[40vh] flex flex-col items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 py-20">
-        <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 text-center">
-          Ready to talk to your data?
-        </h2>
-        <div className="flex flex-col items-center gap-4">
-          <button
-            className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-lg font-semibold shadow transition"
-            // onClick={() => ...} // Aquí puedes poner la acción que desees
-          >
-            Try it now
-          </button>
-        </div>
-      </section>
+      <Intro />
+      <Instructions />
+      <Start />
     </div>
   )
 }
