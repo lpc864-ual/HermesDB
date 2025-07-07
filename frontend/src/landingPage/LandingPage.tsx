@@ -38,13 +38,20 @@ function Instructions() {
                 Your data, in your language
             </h2>
             <div className="max-w-5xl w-full flex flex-row gap-8 justify-center">
-                {/* Cuando este hecha la interfaz completamente, poner capturas antes de cada paso */}
+                {/* Cuando este hecha la interfaz completamente, poner capturas correctas antes de cada paso */}
                 {/* Paso 1 */}
                 <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-label="plug">🔌</span>
+                    <div className="flex items-center">
+                        <img
+                            src="/connect-your-database.png"
+                            alt="Connect your database"
+                            className="w-100 h-100 object-contain"
+                        />
+                    </div>
+                    <div className="flex items-center justify-center w-full">
                         <span className="font-semibold text-lg">Connect your database</span>
                     </div>
+
                     <div className="text-gray-700 mt-1 text-justify">
                         If you only have the schema, Hermes can help you explore it.<br /><br />
                         If you connect to the full database, you'll be able to ask about your data too.
@@ -52,8 +59,14 @@ function Instructions() {
                 </div>
                 {/* Paso 2 */}
                 <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-label="chat">💬</span>
+                    <div className="flex items-center">
+                        <img
+                            src="/ask-your-question.png"
+                            alt="ask-your-question"
+                            className="w-100 h-100 object-contain"
+                        />
+                    </div>
+                    <div className="flex items-center justify-center w-full">
                         <span className="font-semibold text-lg">Ask your question</span>
                     </div>
                     <div className="text-gray-700 mt-1">
@@ -63,8 +76,14 @@ function Instructions() {
                 </div>
                 {/* Paso 3 */}
                 <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
-                    <div className="flex items-center gap-2">
-                        <span className="text-2xl" role="img" aria-label="check">✅</span>
+                    <div className="flex items-center">
+                        <img
+                            src="/get-your-answer.png"
+                            alt="get-your-answer"
+                            className="w-100 h-100 object-contain"
+                        />
+                    </div>
+                    <div className="flex items-center justify-center w-full">
                         <span className="font-semibold text-lg">Get your answer</span>
                     </div>
                     <div className="text-gray-700 mt-1">
@@ -85,7 +104,7 @@ function Start() {
                 Ready to talk to your data?
             </h2>
             <div className="flex flex-col items-center gap-4">
-                <button onClick={() => navigate('/connection')} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-lg font-semibold shadow transition">
+                <button onClick={() => navigate('/sign-in')} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-lg font-semibold shadow transition">
                     Try it now
                 </button>
             </div>
