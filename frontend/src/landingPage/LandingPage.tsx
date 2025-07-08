@@ -104,7 +104,7 @@ function Start() {
                 Ready to talk to your data?
             </h2>
             <div className="flex flex-col items-center gap-4">
-                <button onClick={() => navigate('/sign-in')} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-lg font-semibold shadow transition">
+                <button onClick={() => navigate('/auth')} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-lg font-semibold shadow transition">
                     Try it now
                 </button>
             </div>
