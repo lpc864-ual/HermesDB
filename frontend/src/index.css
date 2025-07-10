@@ -1,3 +1,26 @@
 @tailwind base;       
 @tailwind components;
 @tailwind utilities; 
+
+.animate-stroke-glow {
+  stroke-dasharray: 910;
+  stroke-dashoffset: 910;
+  animation: stroke-glow 2s linear infinite;
+}
+
+@keyframes stroke-glow {
+  0% {
+    stroke-dashoffset: 910;
+    stroke: #a855f7;
+    filter: drop-shadow(0 0 16px #a855f7);
+  }
+  50% {
+    stroke: #38bdf8;
+    filter: drop-shadow(0 0 24px #38bdf8);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    stroke: #a855f7;
+    filter: drop-shadow(0 0 16px #a855f7);
+  }
+} 
