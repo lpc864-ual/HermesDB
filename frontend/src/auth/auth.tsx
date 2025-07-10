@@ -1,8 +1,7 @@
 import { useAuthStore } from "../store/authStore";
-import SignIn from "../components/sign-in";
-import SignUp from "../components/sign-up";
-import ForgotPassword from "../components/forgot-password";
-
+import SignIn from "../components/SignIn";
+import SignUp from "../components/SignUp";
+import ForgotPassword from "../components/ForgotPassword";
 
 const Auth = () => {
     const screen = useAuthStore((state) => state.screen);
