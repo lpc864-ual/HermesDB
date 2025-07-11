@@ -1,6 +1,28 @@
-import React from 'react';
+import { useState, useRef } from "react";
+import type { ChangeEvent } from "react";
+import LogoGlow from '../components/LogoGlow'; 
+import AvatarWithLogout from "../components/AvatarLogout";
 
 export default function Chat() {
+
+  {/*Efecto glow del logo al escribir*/}
+  const [inputValue, setInputValue] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+
+  const typingTimeout = useRef<number | undefined>(undefined);
+
+   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+
+    setIsTyping(true);
+
+    window.clearTimeout(typingTimeout.current);
+    typingTimeout.current = window.setTimeout(() => {
+      setIsTyping(false);
+    }, 800); 
+  };
+
   return (
     <div className="flex min-h-screen w-screen bg-gray-100">
       {/* Sidebar */}
@@ -8,8 +30,7 @@ export default function Chat() {
         {/* Usuario e historial de chats (placeholder) */}
         <div className="flex flex-col items-center gap-6">
           <div className="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center mb-4">
-            {/* Icono de usuario */}
-            <span className="text-3xl">👤</span>
+            <AvatarWithLogout />
           </div>
           <div className="flex-1 w-full overflow-y-auto flex flex-col-reverse gap-2">
             {/* Historial de chats (placeholder) */}
@@ -24,11 +45,15 @@ export default function Chat() {
       {/* Main chat area */}
       <main className="flex-1 flex flex-col items-center justify-center relative">
         {/* Logo centrado */}
-        <img src="/logo.svg" alt="Logo" className="absolute inset-0 m-auto opacity-10 w-1/2 h-1/2 pointer-events-none" />
+        <LogoGlow 
+        isTyping={isTyping}
+        />
         {/* Barra de búsqueda abajo */}
         <form className="absolute bottom-0 left-0 w-full flex items-center bg-white border-t border-gray-300 px-6 py-4 z-20">
           <input
             type="text"
+            value={inputValue}
+            onChange={handleChange}
             placeholder="Escribe tu pregunta..."
             className="flex-1 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-400"
           />
