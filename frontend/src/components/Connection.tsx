@@ -1,3 +1,5 @@
+import uploadSign from '../assets/images/upload-sign.svg';
+
 function ConnectionView() {
     return (
         <section className="min-h-screen bg-white flex flex-col items-center justify-center">
@@ -5,7 +7,7 @@ function ConnectionView() {
                 {/* Botón Upload Schema */}
                 <button className="w-48 h-48 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl flex flex-col items-center justify-center gap-4 transition-all duration-200 shadow-sm hover:shadow-md">
                     <img 
-                        src="/upload-sign.svg" 
+                        src={uploadSign} 
                         alt="Upload icon" 
                         className="w-8 h-8 text-gray-800"
                     />

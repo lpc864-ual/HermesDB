@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import connectDB from '../assets/images/connect-your-database.png';
+import askQuestion from '../assets/images/ask-your-question.png';
+import getAnswer from '../assets/images/get-your-answer.png';
 
 function AnimatedBackground() {
     return (
@@ -43,7 +46,7 @@ function Instructions() {
                 <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
                     <div className="flex items-center">
                         <img
-                            src="/connect-your-database.png"
+                            src={connectDB}
                             alt="Connect your database"
                             className="w-100 h-100 object-contain"
                         />
@@ -61,7 +64,7 @@ function Instructions() {
                 <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
                     <div className="flex items-center">
                         <img
-                            src="/ask-your-question.png"
+                            src={askQuestion}
                             alt="ask-your-question"
                             className="w-100 h-100 object-contain"
                         />
@@ -78,7 +81,7 @@ function Instructions() {
                 <div className="flex-1 flex flex-col items-start gap-4 bg-gray-50 rounded-xl p-6 shadow">
                     <div className="flex items-center">
                         <img
-                            src="/get-your-answer.png"
+                            src={getAnswer}
                             alt="get-your-answer"
                             className="w-100 h-100 object-contain"
                         />
