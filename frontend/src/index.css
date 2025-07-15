@@ -24,3 +24,14 @@
     filter: drop-shadow(0 0 16px #a855f7);
   }
 } 
+
+.fade-popup {
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+.fade-popup.show {
+  opacity: 1;
+}
+.fade-popup.hide {
+  opacity: 0;
+}

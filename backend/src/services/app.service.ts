@@ -37,7 +37,7 @@ export class AppService {
     return this.conversationModel.create({
       ddl,
       url,
-      title: new Date().toISOString(), // TODO: define title generation logic
+      title: new Date().toISOString(),
       messages: [contextMessage, assistantMessage],
     });
   }
