@@ -1,0 +1,45 @@
+services:
+#  back:
+#    image: node:24-alpine
+#    container_name: back
+#    working_dir: /app
+#    command: >
+#      sh -c "npm install -g pnpm @nestjs/cli &&
+#             pnpm install &&
+#             npm run start"
+#    ports:
+#      - '3000:3000'
+#    env_file:
+#      - .env
+#    depends_on:
+#      - db
+#      - ia
+#    restart: always
+#    volumes:
+#      - .:/app
+#      - /app/node_modules
+  db:
+    image: mongo:8.0.12-rc0
+    container_name: db
+    ports:
+      - '27017:27017'
+    volumes:
+      - db_data:/data/db
+#    restart: always
+  ia:
+    image: ollama/ollama:0.9.6
+    container_name: ia
+    ports:
+      - "11434:11434"
+    volumes:
+      - ia_data:/root/.ollama
+#    restart: always
+    entrypoint: [ "/bin/bash", "-c", "\
+      ollama serve & \
+      sleep 5 && \
+      ollama pull sqlcoder && \
+      wait" ]
+
+volumes:
+  ia_data:
+  db_data:

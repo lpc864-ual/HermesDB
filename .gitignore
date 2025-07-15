@@ -1,5 +1,6 @@
 # Node modules (librerias)
 frontend/node_modules/
+backend/node_modules/
 
 # Entorno virtual de Python (librerias)
 backend/venv/
@@ -10,6 +11,7 @@ __pycache__/
 
 # Archivos de entorno
 .env
+backend/.env
 
 # Archivos de log y temporales
 *.log
@@ -25,4 +27,5 @@ Thumbs.db
 # Archivos de builds
 dist/
 build/
-
+backend/dist/
+backend/build/

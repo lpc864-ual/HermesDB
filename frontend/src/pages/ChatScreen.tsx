@@ -5,6 +5,7 @@ export default function Chat() {
   const [buttomIsSelected, setButtomIsSelected] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showModal, setShowModal] = useState(false);
+  const [inputValue, setInputValue] = useState("");
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -22,7 +23,7 @@ export default function Chat() {
   return (
     <>
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
           <div className="bg-white rounded-lg shadow-lg p-12 w-full max-w-2xl flex flex-col gap-4">
             <h2 className="-mb-2 px-2 text-xl font-bold">Connect to a Remote Database</h2>
             <input
@@ -39,7 +40,7 @@ export default function Chat() {
               </button>
               <button
                 onClick={() => setShowModal(true)}
-                className="px-4 py-2 bg-violet-600 text-white rounded hover:bg-violet-700"
+                className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded"
               >
                 Connect
               </button>
@@ -47,36 +48,44 @@ export default function Chat() {
           </div>
         </div>
       )}
-      
+
       <div className="flex min-h-screen w-screen bg-gray-100">
         {/* Sidebar */}
-        <aside className="w-64 bg-gray-900 text-white flex flex-col justify-between py-6 px-4">
+        <aside className="w-64 text-white flex flex-col justify-between bg-gradient-to-b from-blue-100 to-purple-100 py-6 px-4">
           {/* Usuario e historial de chats (placeholder) */}
           <div className="flex flex-col items-center gap-6">
             <div className="flex-1 w-full overflow-y-auto flex flex-col-reverse gap-2">
               {/* Historial de chats (placeholder) */}
-              <div className="bg-gray-800 rounded p-2 mb-2">Chat 1</div>
-              <div className="bg-gray-800 rounded p-2 mb-2">Chat 2</div>
-              <div className="bg-gray-800 rounded p-2 mb-2">Chat 3</div>
+              <button className="w-full bg-indigo-300 hover:bg-indigo-400 text-white py-1 rounded mb-2">Chat 1</button>
+              <button className="w-full bg-indigo-300 hover:bg-indigo-400 text-white py-1 rounded mb-2">Chat 2</button>
+              <button className="w-full bg-indigo-300 hover:bg-indigo-400 text-white py-1 rounded mb-2">Chat 3</button>
             </div>
           </div>
           {/* Botón nuevo chat */}
-          <button className="w-full bg-violet-600 hover:bg-violet-700 text-white py-2 rounded mt-4">Nuevo chat</button>
+          <button className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded mt-4">
+            New chat
+          </button>
         </aside>
         {/* Main chat area */}
         <main className="flex-1 flex flex-col items-center justify-center relative">
           {buttomIsSelected ? (
             <>
               {/* Logo centrado */}
-              <img src="/logo.svg" alt="Logo" className="absolute inset-0 m-auto opacity-10 w-1/2 h-1/2 pointer-events-none" />
+              <img src="/logo.svg" alt="Logo" className="w-1/2 h-1/2 opacity-10 pointer-events-none" />
               {/* Barra de búsqueda abajo */}
-              <form className="absolute bottom-0 left-0 w-full flex items-center bg-white border-t border-gray-300 px-6 py-4 z-20">
+              <form className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 w-1/2 px-2 py-2 bg-white border-gray-300 rounded-2xl flex items-center">
                 <input
                   type="text"
                   placeholder="Escribe tu pregunta..."
-                  className="flex-1 px-4 py-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-violet-400">
+                  className="flex-1 px-2 py-2 focus:outline-none"
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}>
                 </input>
-                <button type="submit" className="ml-4 px-6 py-2 bg-violet-600 text-white rounded hover:bg-violet-700 transition">Enviar</button>
+                <button type="submit" className={`px-4 py-1 rounded text-white transition flex items-center justify-center ${inputValue.trim() ? "bg-indigo-500 hover:bg-indigo-600" : "bg-gray-300"}`} disabled={!inputValue.trim()}>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 20l16-8-16-8v6l10 2-10 2v6z" />
+                  </svg>
+                </button>
               </form>
             </>
           ) : (
