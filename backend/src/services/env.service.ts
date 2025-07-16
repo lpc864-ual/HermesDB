@@ -17,7 +17,7 @@ export class EnvService {
   }
 
   assistantModel(): string {
-    return this.configService.get<string>('ASSISTANT_MODEL') || 'sqlcoder';
+    return this.configService.get<string>('ASSISTANT_MODEL') || 'sqlcoder:7b-q4_K_S';
   }
 
   messagesMax(): number {

@@ -49,10 +49,11 @@ services:
     volumes:
       - ia_data:/root/.ollama
     #    restart: always
+    # ollama pull sql coder se baja la ultima version del modelo: sqlcoder:latest
     entrypoint: [ "/bin/bash", "-c", "\
       ollama serve & \
       sleep 5 && \
-      ollama pull sqlcoder && \
+      ollama pull sqlcoder:7b-q4_K_S && \
       wait" ]
 
 volumes:
