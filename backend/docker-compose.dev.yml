@@ -1,0 +1,61 @@
+services:
+#  back:
+#    image: node:24-alpine
+#    container_name: back
+#    working_dir: /app
+#    command: >
+#      sh -c "npm install -g pnpm @nestjs/cli &&
+#             pnpm install &&
+#             npm run start"
+#    ports:
+#      - '3000:3000'
+#    env_file:
+#      - .env
+#    depends_on:
+#      - db
+#      - ia
+#    restart: always
+#    volumes:
+#      - .:/app
+#      - /app/node_modules
+  db:
+    image: mongo:8.0.12-rc0
+    container_name: db
+    ports:
+      - '27017:27017'
+    volumes:
+      - db_data:/data/db
+    #    restart: always
+
+  postgres:
+    image: postgres:15
+    container_name: postgres_test_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres_test_db
+      POSTGRES_PASSWORD: postgres_test_db
+      POSTGRES_DB: postgres_test_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    #    restart: always
+
+  ia:
+    image: ollama/ollama:0.9.6
+    container_name: ia
+    ports:
+      - "11434:11434"
+    volumes:
+      - ia_data:/root/.ollama
+    #    restart: always
+    # ollama pull sql coder se baja la ultima version del modelo: sqlcoder:latest
+    entrypoint: [ "/bin/bash", "-c", "\
+      ollama serve & \
+      sleep 5 && \
+      ollama pull sqlcoder:7b-q4_K_S && \
+      wait" ]
+
+volumes:
+  ia_data:
+  db_data:
