@@ -1,11 +1,16 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import uploadSign from '../assets/images/upload-sign.svg';
+import { createConversation } from '../services/api/conversation';
 
 export default function Chat() {
   const [buttomIsSelected, setButtomIsSelected] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showModal, setShowModal] = useState(false);
+  const [urlValue, setUrlValue] = useState('');
   const [inputValue, setInputValue] = useState("");
+  const [errorPopup, setErrorPopup] = useState<string | null>(null);
+  const [fadeClass, setFadeClass] = useState('');
+  const timeoutRef = useRef<number | null>(null);
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -20,6 +25,37 @@ export default function Chat() {
     }
   };
 
+  const handleConnect = async () => {
+    try {
+      const result = await createConversation(urlValue);
+      // Puedes ajustar esta comprobación según la estructura de tu backend
+      if (result && result.error) {
+        triggerErrorPopup('Connection failed. Please try again.');
+      } else {
+        setErrorPopup(null);
+        setShowModal(false);
+      }
+    } catch (error) {
+      triggerErrorPopup('Connection failed. Please try again..');
+    }
+  };
+
+  const triggerErrorPopup = (msg: string) => {
+    setErrorPopup(msg);
+    setFadeClass('show');
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setFadeClass('hide');
+      setTimeout(() => setErrorPopup(null), 500);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
+
   return (
     <>
       {showModal && (
@@ -28,8 +64,10 @@ export default function Chat() {
             <h2 className="-mb-2 px-2 text-xl font-bold">Connect to a Remote Database</h2>
             <input
               type="text"
-              placeholder="Enter your database URL"
+              placeholder="Enter your connection database URL"
               className="w-full px-2 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-violet-400"
+              value={urlValue}
+              onChange={e => setUrlValue(e.target.value)}
             />
             <div className="flex justify-end gap-2 mt-4">
               <button
@@ -39,13 +77,22 @@ export default function Chat() {
                 Cancel
               </button>
               <button
-                onClick={() => setShowModal(true)}
+                onClick={handleConnect}
                 className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded"
               >
                 Connect
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {errorPopup && (
+        <div
+          className={`fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 fade-popup ${fadeClass}`}
+          style={{ pointerEvents: 'auto' }}
+        >
+          {errorPopup}
         </div>
       )}
 
@@ -101,7 +148,7 @@ export default function Chat() {
                     />
                     <div className="flex flex-col items-center gap-2">
                       <span className="text-lg font-semibold text-gray-800">Upload Schema</span>
-                      <span className="text-xs text-gray-600 text-center">Upload a .sql file describing your database</span>
+                      <span className="text-xs text-gray-600 text-center px-1.5">Upload a .sql file describing your database</span>
                     </div>
                     <input
                       type="file"
@@ -119,7 +166,7 @@ export default function Chat() {
                     </div>
                     <div className="flex flex-col items-center gap-2 mb-3">
                       <span className="text-xs font-semibold text-gray-800">Connect to a Remote Database</span>
-                      <span className="text-xs text-gray-600 text-center"> Use your connection URL </span>
+                      <span className="text-xs text-gray-600 text-center px-1"> Use your connection database URL </span>
                     </div>
                   </button>
                 </div>
