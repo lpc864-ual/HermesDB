@@ -8,9 +8,11 @@ export default function Chat() {
   const [showModal, setShowModal] = useState(false);
   const [urlValue, setUrlValue] = useState('');
   const [inputValue, setInputValue] = useState("");
-  const [errorPopup, setErrorPopup] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorPopup, setErrorPopup] = useState<string | string[] | null>(null);
   const [fadeClass, setFadeClass] = useState('');
   const timeoutRef = useRef<number | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -27,16 +29,29 @@ export default function Chat() {
 
   const handleConnect = async () => {
     try {
-      const result = await createConversation(urlValue);
-      // Puedes ajustar esta comprobación según la estructura de tu backend
-      if (result && result.error) {
-        triggerErrorPopup('Connection failed. Please try again.');
+      setIsLoading(true);
+      abortControllerRef.current = new AbortController();
+      const result = await createConversation(urlValue, { signal: abortControllerRef.current.signal });
+      if (result && (result.error || result.message)) {
+        // Si el backend devuelve un array de mensajes, pásalo como array
+        if (Array.isArray(result.message)) {
+          triggerErrorPopup(result.message);
+        } else {
+          triggerErrorPopup(result.error || result.message || 'Connection failed. Please try again.');
+        }
       } else {
         setErrorPopup(null);
         setShowModal(false);
       }
-    } catch (error) {
-      triggerErrorPopup('Connection failed. Please try again..');
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        // Petición cancelada, no mostrar error
+      } else {
+        triggerErrorPopup('Connection failed. Please try again.');
+      }
+    }
+    finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,7 +62,7 @@ export default function Chat() {
     timeoutRef.current = setTimeout(() => {
       setFadeClass('hide');
       setTimeout(() => setErrorPopup(null), 500);
-    }, 2000);
+    }, 4000);
   };
 
   useEffect(() => {
@@ -55,6 +70,14 @@ export default function Chat() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setIsLoading(false);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+  };
 
   return (
     <>
@@ -72,15 +95,23 @@ export default function Chat() {
             <div className="flex justify-end gap-2 mt-4">
               <button
                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-                onClick={() => setShowModal(false)}
+                onClick={handleCancel}
               >
                 Cancel
               </button>
               <button
                 onClick={handleConnect}
                 className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded"
+                disabled={isLoading}
               >
-                Connect
+                {isLoading ? (
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                  </svg>
+                ) : (
+                  "Connect"
+                )}
               </button>
             </div>
           </div>
@@ -92,7 +123,15 @@ export default function Chat() {
           className={`fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded shadow-lg z-50 fade-popup ${fadeClass}`}
           style={{ pointerEvents: 'auto' }}
         >
-          {errorPopup}
+          {Array.isArray(errorPopup) ? (
+            <ul className="list-disc pl-5">
+              {errorPopup.map((msg, idx) => (
+                <li key={idx}>{msg}</li>
+              ))}
+            </ul>
+          ) : (
+            errorPopup
+          )}
         </div>
       )}
 

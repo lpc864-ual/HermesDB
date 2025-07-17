@@ -31,8 +31,6 @@ Special thanks to my teammates—and above all, friends—for their small (and n
 
 Beyond the technical side, thank you all for being my friends and for sharing laughs, stories, and good times on Discord while working on this project.
 
-I’d also like to thank **Josh Rubio**, my coworker, who—like Juan—helped clarify the UI design and worked on an animation for the icon when sending a message (still a work in progress!).
-
 ---
 
 **If you want to know more about the installation process, please refer to the README files in the `frontend` and `backend` folders.**
