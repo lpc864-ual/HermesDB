@@ -1,8 +1,9 @@
 Just a side proyect made by:
 
-1. Anass El Jabiry
+1. Anass El Jabiry Kaddir
 2. Daniel Pérez Valverde
-3. Luis Peraza
+3. Juan Jose Lamas Ferrer
+3. Luis Alexander Peraza Corobo
 
 Basically, it will be open-source software that allows individuals and businesses to make natural language queries against their databases, without needing technical knowledge and receiving the information in natural language.
 

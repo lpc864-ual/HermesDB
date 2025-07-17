@@ -1,5 +1,31 @@
-# Ignorar node_modules en cualquier subcarpeta (como frontend)
-**/node_modules/
+# Node modules (librerias)
+frontend/node_modules/
+backend/node_modules/
 
-# Ignorar entornos virtuales de Python (como backend/venv)
-**/venv/
+# Entorno virtual de Python (librerias)
+backend/venv/
+
+# Archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Archivos de entorno
+.env
+backend/.env
+
+# Archivos de log y temporales
+*.log
+*.tmp
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Configuración de editores
+.vscode/
+
+# Archivos de builds
+dist/
+build/
+backend/dist/
+backend/build/
