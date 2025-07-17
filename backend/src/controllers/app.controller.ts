@@ -17,7 +17,7 @@ import { RoleEnum } from '../schemas/conversation.schema';
 import { AppService } from '../services/app.service';
 import { DbIntrospectorService } from '../services/db-introspector.service';
 
-@Controller()
+@Controller('api/conversation')
 export class AppController {
   constructor(
     private readonly appService: AppService,
