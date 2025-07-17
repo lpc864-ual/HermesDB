@@ -1,8 +1,8 @@
-export async function createConversation(url: string) {
-    const response = await fetch('/api/conversation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url }),
-    });
-    return response.json();
-  }
+export async function createConversation(url: string, options?: RequestInit) {
+  return fetch('/api/conversation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url }),
+    ...options, 
+  }).then(res => res.json());
+}
