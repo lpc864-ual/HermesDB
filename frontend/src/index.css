@@ -35,3 +35,8 @@
 .fade-popup.hide {
   opacity: 0;
 }
+
+/* Estilos personalizados para la barra de scroll */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0px;
+}

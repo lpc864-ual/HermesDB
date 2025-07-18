@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import uploadSign from '../assets/images/upload-sign.svg';
 import { createConversation } from '../services/api/conversation';
+import { useChatStore } from '../services/store/ChatStore';
 
 export default function Chat() {
   const [buttomIsSelected, setButtomIsSelected] = useState(false);
@@ -13,6 +14,7 @@ export default function Chat() {
   const [fadeClass, setFadeClass] = useState('');
   const timeoutRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const { chats, currentChatId, addChat, setCurrentChat, getCurrentChat } = useChatStore();
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -24,6 +26,8 @@ export default function Chat() {
     const file = event.target.files[0];
     if (file) {
       setButtomIsSelected(true);
+      const newId = addChat();
+      setCurrentChat(newId);
     }
   };
 
@@ -42,6 +46,8 @@ export default function Chat() {
       } else {
         setErrorPopup(null);
         setShowModal(false);
+        const newId = addChat();
+        setCurrentChat(newId);
       }
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -137,21 +143,31 @@ export default function Chat() {
 
       <div className="flex min-h-screen w-screen bg-gray-100">
         {/* Sidebar */}
-        <aside className="w-64 text-white flex flex-col justify-between bg-gradient-to-b from-blue-100 to-purple-100 py-6 px-4">
-          {/* Usuario e historial de chats (placeholder) */}
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex-1 w-full overflow-y-auto flex flex-col-reverse gap-2">
-              {/* Historial de chats (placeholder) */}
-              <button className="w-full bg-indigo-300 hover:bg-indigo-400 text-white py-1 rounded mb-2">Chat 1</button>
-              <button className="w-full bg-indigo-300 hover:bg-indigo-400 text-white py-1 rounded mb-2">Chat 2</button>
-              <button className="w-full bg-indigo-300 hover:bg-indigo-400 text-white py-1 rounded mb-2">Chat 3</button>
-            </div>
+        <aside className="w-64 h-screen text-white flex flex-col bg-gradient-to-b from-blue-100 to-purple-100 py-6 px-4">
+          {/* Historial de chats scrollable */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto gap-2 custom-scrollbar">
+            {chats.slice().reverse().map((chat) => (
+              <button
+                key={chat.id}
+                className={`w-full ${currentChatId === chat.id ? 'bg-indigo-500' : 'bg-indigo-300'} hover:bg-indigo-600 text-white py-1 rounded mb-2`}
+                onClick={() => {
+                  setCurrentChat(chat.id);
+                  setButtomIsSelected(true);
+                }}
+              >
+                Chat {chat.id}
+              </button>
+            ))}
           </div>
-          {/* Botón nuevo chat */}
-          <button className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded mt-4">
+          {/* Botón nuevo chat - fijo al final */}
+          <button
+            onClick={() => setButtomIsSelected(false)}
+            className="w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded mt-4"
+          >
             New chat
           </button>
         </aside>
+
         {/* Main chat area */}
         <main className="flex-1 flex flex-col items-center justify-center relative">
           {buttomIsSelected ? (
