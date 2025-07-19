@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import uploadSign from '../assets/images/upload-sign.svg';
-import { createConversation } from '../services/api/conversation';
 import { useChatStore } from '../services/store/ChatStore';
+import type { Message } from '../types/chat';
+import { createConversation } from '../services/api/conversation';
+import { mockAddMessageToApi } from '../services/api/conversation';
 
 export default function Chat() {
   const [buttomIsSelected, setButtomIsSelected] = useState(false);
@@ -9,12 +11,16 @@ export default function Chat() {
   const [showModal, setShowModal] = useState(false);
   const [urlValue, setUrlValue] = useState('');
   const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [errorPopup, setErrorPopup] = useState<string | string[] | null>(null);
   const [fadeClass, setFadeClass] = useState('');
   const timeoutRef = useRef<number | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  const { chats, currentChatId, addChat, setCurrentChat, getCurrentChat } = useChatStore();
+  const { chats, currentChatId, addChat, addMessageToStore, setCurrentChat, getCurrentChat } = useChatStore();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isLoadingMessage, setIsLoadingMessage] = useState(false);
+  const [aiTypingMessage, setAiTypingMessage] = useState<string | null>(null);
+  const [messageError, setMessageError] = useState<string | null>(null);
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
@@ -33,7 +39,7 @@ export default function Chat() {
 
   const handleConnect = async () => {
     try {
-      setIsLoading(true);
+      setIsLoadingUrl(true);
       abortControllerRef.current = new AbortController();
       const result = await createConversation(urlValue, { signal: abortControllerRef.current.signal });
       if (result && (result.error || result.message)) {
@@ -57,7 +63,7 @@ export default function Chat() {
       }
     }
     finally {
-      setIsLoading(false);
+      setIsLoadingUrl(false);
     }
   };
 
@@ -79,9 +85,56 @@ export default function Chat() {
 
   const handleCancel = () => {
     setShowModal(false);
-    setIsLoading(false);
+    setIsLoadingUrl(false);
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
+    }
+  };
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; 
+      const maxHeight = 40 * 4; 
+      textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
+    }
+  }, [inputValue]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (currentChatId && inputValue.trim()) {
+      try {
+        // Agregar mensaje del usuario al store
+        const msg: Message = { role: 'user', content: inputValue };
+        setInputValue('');
+        //if (textareaRef.current) textareaRef.current.style.height = '40px';
+        addMessageToStore(currentChatId, msg);
+        setIsLoadingMessage(true);
+        setAiTypingMessage(null);
+        setMessageError(null);
+
+        // Enviar al backend 
+        const response = await mockAddMessageToApi(currentChatId, msg.content);
+
+        // Agregar respuesta de la IA al store
+        if (response && response.content) {
+          let i = 0;
+          setAiTypingMessage(response.content[i]);
+          const interval = setInterval(() => {
+            setAiTypingMessage((prev) => (prev ?? '') + response.content[i]);
+            i++;
+            if (i >= response.content.length) {
+              clearInterval(interval);
+              addMessageToStore(currentChatId, { role: 'ai', content: response.content });
+              setAiTypingMessage(null);
+            }
+          }, 5);
+        }
+      } catch (error: any) {
+        setMessageError('Error getting response. Please try again.');
+      } finally {
+        setIsLoadingMessage(false);
+      }
     }
   };
 
@@ -108,9 +161,9 @@ export default function Chat() {
               <button
                 onClick={handleConnect}
                 className="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded"
-                disabled={isLoading}
+                disabled={isLoadingUrl}
               >
-                {isLoading ? (
+                {isLoadingUrl ? (
                   <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -145,7 +198,7 @@ export default function Chat() {
         {/* Sidebar */}
         <aside className="w-64 h-screen text-white flex flex-col bg-gradient-to-b from-blue-100 to-purple-100 py-6 px-4">
           {/* Historial de chats scrollable */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-y-auto gap-2 custom-scrollbar">
+          <div className="flex flex-1 flex-col min-h-0 overflow-y-auto gap-2 custom-scrollbar">
             {chats.slice().reverse().map((chat) => (
               <button
                 key={chat.id}
@@ -169,24 +222,56 @@ export default function Chat() {
         </aside>
 
         {/* Main chat area */}
-        <main className="flex-1 flex flex-col items-center justify-center relative">
+        <main className="relative flex flex-1 flex-col items-center justify-center">
           {buttomIsSelected ? (
             <>
+              {/* Mensajes del chat: si el rol es ai y contiene la palabra error --> color rojo e icono de advertencia */}
+              <div className="h-[80%] w-full max-w-2xl mx-auto overflow-y-auto mt-6 mb-14 px-4 py-0" style={{ maxHeight: '80vh' }}>
+                {getCurrentChat()?.messages.map((m, i) => (
+                  <div key={i} className={`flex mb-4 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[70%] rounded-2xl px-4 py-2 break-words ${m.role === 'user' ? 'bg-indigo-500 text-white' : 'bg-gray-200 text-gray-900'}`}>
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {/* Mensaje de IA "escribiendo" */}
+                {aiTypingMessage && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[70%] rounded-2xl mb-4 px-4 py-2 bg-gray-200 text-gray-900 animate-pulse break-words">
+                      {aiTypingMessage}
+                    </div>
+                  </div>
+                )}
+              </div>
               {/* Logo centrado */}
-              <img src="/logo.svg" alt="Logo" className="w-1/2 h-1/2 opacity-10 pointer-events-none" />
+              <img src="/logo.svg" alt="Logo" className="absolute index-0 w-1/2 h-1/2 opacity-10 pointer-events-none" draggable={false} />
               {/* Barra de búsqueda abajo */}
-              <form className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 w-1/2 px-2 py-2 bg-white border-gray-300 rounded-2xl flex items-center">
-                <input
-                  type="text"
-                  placeholder="Escribe tu pregunta..."
-                  className="flex-1 px-2 py-2 focus:outline-none"
+              <form onSubmit={handleSendMessage} className="w-full max-w-2xl mx-auto px-2 py-2 bg-white border-gray-300 rounded-2xl flex items-center" style={{ position: 'sticky', bottom: 21, zIndex: 20 }}>
+                <textarea
+                  ref={textareaRef}
+                  placeholder="Write your question..."
+                  className="flex-1  px-2 py-2 focus:outline-none resize-none overflow-hidden"
                   value={inputValue}
-                  onChange={e => setInputValue(e.target.value)}>
-                </input>
+                  onChange={e => setInputValue(e.target.value)}
+                  rows={1}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage(e as any); // 'as any' para evitar error de tipo, ya que es un KeyboardEvent, pero tu función espera un FormEvent
+                    }
+                  }}
+                />
                 <button type="submit" className={`px-4 py-1 rounded text-white transition flex items-center justify-center ${inputValue.trim() ? "bg-indigo-500 hover:bg-indigo-600" : "bg-gray-300"}`} disabled={!inputValue.trim()}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 20l16-8-16-8v6l10 2-10 2v6z" />
-                  </svg>
+                  {isLoadingMessage ? (
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 20l16-8-16-8v6l10 2-10 2v6z" />
+                    </svg>
+                  )}
                 </button>
               </form>
             </>

@@ -1,0 +1,9 @@
+- mejorar scroll de Sidebar
+- Al añadir un mensaje mejorar el scroll para que solo se aplique sobre la zona de mesajes.
+Hacer del logo que siga el scroll que haga la persona para que se mantenga centrado
+(igual con el buscador)
+- Que conforme se genere un mensaje, se active el scroll y empuje hacia arriba el resto de
+mensajes para que se pueda ver el ultimo mensaje y que no se solape con el buscador
+- Añadir opcion de cancelar mensajer
+- Si el mensaje generado por la ia contiene un error, cambiar a color rojo el mensaje con
+icono de advertencia
