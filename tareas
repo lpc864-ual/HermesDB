@@ -1,0 +1,5 @@
+- mejorar scroll de Sidebar
+- añadir opcion de eliminar chat
+- Añadir opcion de cancelar mensaje enviado
+- Si el mensaje generado por la ia contiene un error, cambiar a color rojo el mensaje con
+icono de advertencia
