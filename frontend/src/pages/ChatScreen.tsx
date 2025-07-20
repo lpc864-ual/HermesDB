@@ -3,7 +3,8 @@ import uploadSign from '../assets/images/upload-sign.svg';
 import { useChatStore } from '../services/store/ChatStore';
 import type { Message } from '../types/chat';
 import { createConversation } from '../services/api/conversation';
-import { mockAddMessageToApi } from '../services/api/conversation';
+import { addMessageToApi } from '../services/api/conversation';
+import { ClipLoader } from "react-spinners";
 
 export default function Chat() {
   const [buttomIsSelected, setButtomIsSelected] = useState(false);
@@ -11,6 +12,7 @@ export default function Chat() {
   const [showModal, setShowModal] = useState(false);
   const [urlValue, setUrlValue] = useState('');
   const [inputValue, setInputValue] = useState("");
+  const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [isLoadingUrl, setIsLoadingUrl] = useState(false);
   const [errorPopup, setErrorPopup] = useState<string | string[] | null>(null);
   const [fadeClass, setFadeClass] = useState('');
@@ -28,12 +30,22 @@ export default function Chat() {
     }
   };
 
-  const handleFileChange = (event: any) => {
+  const handleFileChange = async (event: any) => {
     const file = event.target.files[0];
     if (file) {
-      setButtomIsSelected(true);
-      const newId = addChat();
-      setCurrentChat(newId);
+      try {
+        setIsLoadingFile(true);
+        const result = await createConversation({ file });
+        console.log("result: ", result);
+        setButtomIsSelected(true);
+        const newId = addChat();
+        setCurrentChat(newId);
+      } catch (error) {
+        setButtomIsSelected(false);
+        triggerErrorPopup('Connection failed. Please try again.'); // Cambiar para mostrar error especifico del backend
+      } finally {
+        setIsLoadingFile(false);
+      }
     }
   };
 
@@ -41,9 +53,8 @@ export default function Chat() {
     try {
       setIsLoadingUrl(true);
       abortControllerRef.current = new AbortController();
-      const result = await createConversation(urlValue, { signal: abortControllerRef.current.signal });
+      const result = await createConversation({ url: urlValue }, { signal: abortControllerRef.current.signal });
       if (result && (result.error || result.message)) {
-        // Si el backend devuelve un array de mensajes, pásalo como array
         if (Array.isArray(result.message)) {
           triggerErrorPopup(result.message);
         } else {
@@ -94,8 +105,8 @@ export default function Chat() {
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; 
-      const maxHeight = 40 * 4; 
+      textarea.style.height = 'auto';
+      const maxHeight = 40 * 4;
       textarea.style.height = Math.min(textarea.scrollHeight, maxHeight) + 'px';
     }
   }, [inputValue]);
@@ -114,7 +125,7 @@ export default function Chat() {
         setMessageError(null);
 
         // Enviar al backend 
-        const response = await mockAddMessageToApi(currentChatId, msg.content);
+        const response = await addMessageToApi(currentChatId, msg.content);
 
         // Agregar respuesta de la IA al store
         if (response && response.content) {
@@ -128,7 +139,7 @@ export default function Chat() {
               addMessageToStore(currentChatId, { role: 'ai', content: response.content });
               setAiTypingMessage(null);
             }
-          }, 5);
+          }, 50);
         }
       } catch (error: any) {
         setMessageError('Error getting response. Please try again.');
@@ -164,10 +175,15 @@ export default function Chat() {
                 disabled={isLoadingUrl}
               >
                 {isLoadingUrl ? (
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                  </svg>
+                  <ClipLoader
+                    size={15}
+                    color={"#ffffff"}
+                    loading={true}
+                    cssOverride={{
+                      animation: 'moon-rotate 0.6s linear infinite', // animación personalizada solo de rotación
+                    }}
+                    speedMultiplier={0.5}
+                  />
                 ) : (
                   "Connect"
                 )}
@@ -263,10 +279,15 @@ export default function Chat() {
                 />
                 <button type="submit" className={`px-4 py-1 rounded text-white transition flex items-center justify-center ${inputValue.trim() ? "bg-indigo-500 hover:bg-indigo-600" : "bg-gray-300"}`} disabled={!inputValue.trim()}>
                   {isLoadingMessage ? (
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-                    </svg>
+                    <ClipLoader
+                      size={20}
+                      color={"#ffffff"}
+                      loading={true}
+                      cssOverride={{
+                        animation: 'moon-rotate 0.6s linear infinite', // animación personalizada solo de rotación
+                      }}
+                      speedMultiplier={0.5}
+                    />
                   ) : (
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 20l16-8-16-8v6l10 2-10 2v6z" />
@@ -278,38 +299,53 @@ export default function Chat() {
           ) : (
             <div className="flex flex-1 items-center justify-center w-full h-full">
               <section className="min-h-screen flex flex-col items-center justify-center">
-                <div className="flex flex-row gap-8 items-center">
-                  {/* Botón Upload Schema */}
-                  <button onClick={handleUploadClick} className="w-48 h-48 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl flex flex-col items-center justify-center gap-4 transition-all duration-200 shadow-sm hover:shadow-md">
-                    <img
-                      src={uploadSign}
-                      alt="Upload icon"
-                      className="w-8 h-8 text-gray-800"
+                {isLoadingFile ? (
+                  <div className='flex flex-1 flex-col items-center justify-center gap-2'>
+                    <ClipLoader
+                      size={50}
+                      color={"#000000"}
+                      loading={true}
+                      cssOverride={{
+                        animation: 'moon-rotate 0.6s linear infinite', // animación personalizada solo de rotación
+                      }}
+                      speedMultiplier={0.5}
                     />
-                    <div className="flex flex-col items-center gap-2">
-                      <span className="text-lg font-semibold text-gray-800">Upload Schema</span>
-                      <span className="text-xs text-gray-600 text-center px-1.5">Upload a .sql file describing your database</span>
-                    </div>
-                    <input
-                      type="file"
-                      accept=".sql"
-                      ref={fileInputRef}
-                      style={{ display: 'none' }}
-                      onChange={handleFileChange}
-                    />
-                  </button>
+                    <span>Processing file</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-row gap-8 items-center">
+                    {/* Botón Upload Schema */}
+                    <button onClick={handleUploadClick} className="w-48 h-48 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl flex flex-col items-center justify-center gap-4 transition-all duration-200 shadow-sm hover:shadow-md">
+                      <img
+                        src={uploadSign}
+                        alt="Upload icon"
+                        className="w-8 h-8 text-gray-800"
+                      />
+                      <div className="flex flex-col items-center gap-2">
+                        <span className="text-lg font-semibold text-gray-800">Upload Schema</span>
+                        <span className="text-xs text-gray-600 text-center px-1.5">Upload a .sql file describing your database</span>
+                      </div>
+                      <input
+                        type="file"
+                        accept=".sql"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                      />
+                    </button>
 
-                  {/* Botón Insert DB Credentials */}
-                  <button onClick={() => setShowModal(true)} className="w-48 h-48 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl flex flex-col items-center justify-center gap-4 transition-all duration-200 shadow-sm hover:shadow-md">
-                    <div className="text-4xl font-bold text-black">
-                      URL
-                    </div>
-                    <div className="flex flex-col items-center gap-2 mb-3">
-                      <span className="text-xs font-semibold text-gray-800">Connect to a Remote Database</span>
-                      <span className="text-xs text-gray-600 text-center px-1"> Use your connection database URL </span>
-                    </div>
-                  </button>
-                </div>
+                    {/* Botón Insert DB Credentials */}
+                    <button onClick={() => setShowModal(true)} className="w-48 h-48 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl flex flex-col items-center justify-center gap-4 transition-all duration-200 shadow-sm hover:shadow-md">
+                      <div className="text-4xl font-bold text-black">
+                        URL
+                      </div>
+                      <div className="flex flex-col items-center gap-2 mb-3">
+                        <span className="text-xs font-semibold text-gray-800">Connect to a Remote Database</span>
+                        <span className="text-xs text-gray-600 text-center px-1"> Use your connection database URL </span>
+                      </div>
+                    </button>
+                  </div>
+                )}
               </section>
             </div>
           )}
