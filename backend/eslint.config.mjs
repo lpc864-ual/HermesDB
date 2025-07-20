@@ -33,6 +33,7 @@ export default [
         beforeEach: 'readonly',
         afterEach: 'readonly',
         jest: 'readonly',
+        Express: 'readonly',
       },
     },
     plugins: {
