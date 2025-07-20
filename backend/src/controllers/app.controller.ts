@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -6,7 +7,12 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { validateOrReject } from 'class-validator';
+import { memoryStorage } from 'multer';
 
 import {
   CreateConversationDto,
@@ -35,10 +41,38 @@ export class AppController {
   }
 
   @Post()
-  async createConversation(@Body() body: CreateConversationDto) {
-    const ddl = await this.dbIntrospector.getDDLFromUrl(body.url);
+  @UseInterceptors(
+    FileInterceptor('schema', {
+      storage: memoryStorage(),
+    }),
+  )
+  async createConversation(
+    // @ts-ignore
+    @UploadedFile() ddl: Express.Multer.File,
+    @Body() body: any,
+  ) {
+    const dto = new CreateConversationDto();
 
-    return this.appService.createConversation(ddl, body.url);
+    dto.url = body && 'url' in body ? body.url : undefined;
+    dto.title = body?.title;
+    dto.ddl = ddl;
+
+    try {
+      await validateOrReject(dto);
+    } catch (errors) {
+      throw new BadRequestException(errors);
+    }
+
+    const schema = body.url
+      ? await this.dbIntrospector.getDDLFromUrl(body.url)
+      : ddl.buffer.toString('utf-8');
+
+    return this.appService.createConversation({
+      ...dto,
+      ddl: schema,
+      title: dto.title ?? new Date().toISOString(),
+      messages: [],
+    });
   }
 
   @Post(':id')

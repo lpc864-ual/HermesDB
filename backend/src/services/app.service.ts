@@ -24,10 +24,10 @@ export class AppService {
     private readonly envService: EnvService,
   ) {}
 
-  async createConversation(ddl: string, url?: string): Promise<Conversation> {
+  async createConversation(data: Conversation): Promise<Conversation> {
     const contextMessage: Message = {
       role: RoleEnum.USER,
-      content: `Here is the database schema. Use this only as context for future SQL queries. Do not reply to this message. ${ddl}`,
+      content: `Here is the database schema. Use this only as context for future SQL queries. Do not reply to this message. ${data.ddl}`,
     };
 
     const assistantMessage = await this.chatService.sendMessage([
@@ -35,9 +35,7 @@ export class AppService {
     ]);
 
     return this.conversationModel.create({
-      ddl,
-      url,
-      title: new Date().toISOString(),
+      ...data,
       messages: [contextMessage, assistantMessage],
     });
   }

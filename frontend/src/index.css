@@ -25,6 +25,11 @@
   }
 } 
 
+@keyframes moon-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .fade-popup {
   opacity: 0;
   transition: opacity 0.5s;
@@ -34,4 +39,9 @@
 }
 .fade-popup.hide {
   opacity: 0;
+}
+
+/* Estilos personalizados para la barra de scroll */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0px;
 }

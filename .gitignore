@@ -1,6 +1,7 @@
 # Node modules (librerias)
 frontend/node_modules/
 backend/node_modules/
+backend/dist/
 
 # Entorno virtual de Python (librerias)
 backend/venv/
@@ -16,6 +17,7 @@ backend/.env
 # Archivos de log y temporales
 *.log
 *.tmp
+.idea/
 
 # Archivos del sistema operativo
 .DS_Store
